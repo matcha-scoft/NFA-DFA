@@ -7,22 +7,22 @@
 #include <cstring>
 using namespace std;
 
-const int maxt = 1e4;
+const int maxt = 1e4 + 10;                  //字母表中字母数上限
 
-map <int, int> nextState[maxt];
-set <int> allState;
-vector <int> allStates;
-queue <int> stateQueue;
-char T[maxt];
+map <int, int> nextState[maxt];             //保存自动机，一维为字母表，二维为初始状态
+set <int> allState;                         //保存全部状态集合
+vector <int> allStates;                     //保存全部状态的集合，用于遍历
+queue <int> stateQueue;                     //保存待处理的状态集合
+char T[maxt];                               //字母表
 
-void initNFA(int& , int& );
-void changeToDFA(int );
-void printDFA(int );
-int changeToInt(string );
+void initNFA(int& , int& );                 //初始化，由用户输入NFA
+void changeToDFA(int );                     //NFA转化为DFA
+void printDFA(int );                        //输出DFA
+int changeToInt(string );                   //字符串处理，将输入的状态字符串转化成数字表示
 
 int main(void) {
-    int q, t;
     printf("********NFA-DFA转换系统********\n");
+    int q, t;                               //状态数q，字母数t
     initNFA(q, t);
     changeToDFA(t);
     printDFA(t);
@@ -32,6 +32,7 @@ int main(void) {
 void initNFA(int &q, int &t) {
     printf("请输入NFA状态总数q：");
     cin >> q;
+    //默认字母表为q0，q1，q2...q（n-1）
     printf("共有%d个状态，状态表为：{", q);
     for (int i = 0; i < q; i ++) {
         if (i != q - 1) {
@@ -49,11 +50,14 @@ void initNFA(int &q, int &t) {
     getchar();
     printf("请输入NFA的转换函数，状态之间由空格隔开，空状态请输入NULL：\n");
     
+    //初始化NFA，使用一个整数表示每一个状态，将初始状态插入状态集
     for (int i = 0; i < q; i ++) {
         int state = 1 << i;
         allState.insert(state);
         allStates.push_back(state);
     }
+    //读取用户输入，更新状态集合，待处理状态队列和nextState表
+    //der函数表示自动机的状态转移函数
     for (int i = 0; i < q; i ++) {
         int thisstate = 1 << i;
         for (int j = 0; j < t; j ++) {
@@ -71,6 +75,7 @@ void initNFA(int &q, int &t) {
                 if (ch == '\n') break;
             }
             nextState[j][thisstate] = nextstate;
+            //当新状态不存在于状态集时，该状态为待处理状态
             if (nextstate && allState.find(nextstate) == allState.end()) {
                 allState.insert(nextstate);
                 stateQueue.push(nextstate);
@@ -81,6 +86,7 @@ void initNFA(int &q, int &t) {
 }
 
 void changeToDFA(int t) {
+    //循环处理待处理状态队列
     while (!stateQueue.empty()) {
         for (int i = 0; i < t; i ++) {
             int thisState = stateQueue.front();
@@ -106,6 +112,7 @@ void changeToDFA(int t) {
 }
 
 void printDFA(int t) {
+    //输出DFA，用状态转移函数表示
     printf("转换后的DFA转换函数：\n");
     for (int i = 0; i < allStates.size(); i ++) {
         for (int k = 0; k < t; k ++) {
